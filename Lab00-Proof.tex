@@ -1,0 +1,162 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage{ctex}
+\usepackage{amsmath,amscd,amsbsy,amssymb,latexsym,url,bm,amsthm}
+\usepackage{epsfig,graphicx,subfigure}
+\usepackage{enumitem,balance}
+\usepackage{wrapfig}
+\usepackage{mathrsfs,euscript}
+\usepackage[usenames]{xcolor}
+\usepackage{hyperref}
+\usepackage[vlined,ruled,linesnumbered]{algorithm2e}
+\hypersetup{colorlinks=true,linkcolor=black}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{exercise}{Exercise}
+\newtheorem*{solution}{Solution}
+\newtheorem{definition}{Definition}
+\theoremstyle{definition}
+
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+
+\newcommand{\postscript}[2]
+ {\setlength{\epsfxsize}{#2\hsize}
+  \centerline{\epsfbox{#1}}}
+
+\renewcommand{\baselinestretch}{1.0}
+
+\setlength{\oddsidemargin}{-0.365in}
+\setlength{\evensidemargin}{-0.365in}
+\setlength{\topmargin}{-0.3in}
+\setlength{\headheight}{0in}
+\setlength{\headsep}{0in}
+\setlength{\textheight}{10.1in}
+\setlength{\textwidth}{7in}
+\makeatletter \renewenvironment{proof}[1][Proof] {\par\pushQED{\qed}\normalfont\topsep6\p@\@plus6\p@\relax\trivlist\item[\hskip\labelsep\bfseries#1\@addpunct{.}]\ignorespaces}{\popQED\endtrivlist\@endpefalse} \makeatother
+\makeatletter
+\renewenvironment{solution}[1][Solution] {\par\pushQED{\qed}\normalfont\topsep6\p@\@plus6\p@\relax\trivlist\item[\hskip\labelsep\bfseries#1\@addpunct{.}]\ignorespaces}{\popQED\endtrivlist\@endpefalse} \makeatother
+
+\begin{document}
+\noindent
+
+%========================================================================
+\noindent\framebox[\linewidth]{\shortstack[c]{
+\Large{\textbf{Lab00-Proof}}\vspace{1mm}\\
+CS214-Algorithm and Complexity, Xiaofeng Gao, Spring 2020.}}
+\begin{center}
+\footnotesize{\color{red}$*$ If there is any problem, please contact TA Yiming Liu.}
+
+% Please write down your name, student id and email.
+\footnotesize{\color{blue}$*$ Name:Zehao Wang  \quad Student ID:518021910976 \quad Email: davidwang200099@sjtu.edu.cn}
+\end{center}
+
+\begin{enumerate}
+    \item
+    Prove that for any integer $n>2$, there is a prime $p$ satisfying $n<p<n!$. {\color{blue}(Hint: consider a prime factor $p$ of $n!-1$ and prove by contradiction)}
+    \begin{proof}
+      
+      Assume that there is no prime satisfying $n<p<n!$.Then $\forall$$m$ which satisfies $n<m<n!$ ,
+      m is not a prime.
+      
+      Consider $m=n!-1$ which follows $n<m<n!$. $\because$ $\forall$ $p<=n$,$\frac{n!-1}{p}=\frac{n!}{p}-\frac{1}{p}$,$\frac{n!}{p}$ is an integer,$\frac{1}{p}$ is a fraction, So $\frac{n!-1}{p}$ is not an interger.
+      
+      $\therefore$ $n!-1$ is not divisible by primes smaller than $n$.
+      
+      $\therefore$ $\exists$ prime $p_0$ $\in$ $(n,n!)$,by which $n!-1$ is divisible,which is contradictive to the assumption.
+      
+      $\therefore$ the former statement makes sense.
+      
+    \end{proof}
+
+    \item
+    Use the minimal counterexample principle to prove that for any integer $n>17$, there exist integers $i_n\ge 0$ and $j_n\ge 0$, such that $n = i_n \times 4 + j_n \times 7$.
+    \begin{proof}
+        
+        Assume that $\exists$ a smallest $n_0>17$,there do not exist integers $i_{n_0}\ge0$ and $j_{n_0}\ge0$, such that $n_0 = i_{n_0} \times 4 + j_{n_0} \times 7$.
+        
+        Then $\exists i_{n_0-1} \ge 0, j_{n_0-1} \ge 0$, such that $n_0-1= i_{n_0-1} \times 4 + j_{n_0-1} \times 7$.
+        \begin{enumerate}
+         
+        \item
+            $j_{n_0-1}=0$ 
+            
+            $\because n_0-1>17$ $\therefore i_{n_0-1}\ge5$.
+            
+            then $n_0=(i_{n_0-1}-5) \times 4 + 1 \times 7$, namely $\exists i_{n_0}=i_{n_0-1}-5,j_{n_0}=1$, such that $n_0 = i_{n_0} \times 4 + j_{n_0} \times 7$, which is objective to the assumption.
+        \item 
+            $j_{n_0-1}>0$
+         \end{enumerate}    
+            then $n_0=(i_{n_0-1}+2)\times4+(j_{n_0-1}-1)\times7$, namely $\exists i_{n_0}=i_{n_0-1}+2, j_{n_0}=j_{n_0-1}-1$, such that  $n_0 = i_{n_0} \times 4 + j_{n_0} \times 7$,which is also objective to the assumption.
+            
+        $\therefore$ for any integer $n>17$, there exist integers $i_n\ge 0$ and $j_n\ge 0$, such that $n = i_n \times 4 + j_n \times 7$.
+        
+    \end{proof}
+
+    \item
+    Let $P=\{p_1, p_2, \cdots\}$ the set of all primes. Suppose that $\{p_i\}$ is monotonically    increasing, i.e., $p_1=2$, $p_2=3$, $p_3=5$, $\cdots$. Please prove: $p_n<2^{2^n}$. {\color{blue}(Hint: $p_i \nmid (1+\prod_{j=1}^n p_j), i=1,2,\cdots,n$.)}
+    \begin{proof}
+    	\begin{enumerate}
+    	    \item 
+    	         When n=1, $p_1=2<2^{2^1}=4$. The former statement is true.
+    	    \item 
+    	        Assumes that when $n=k$, the former statement is true, namely $p_k<2^{2^k}$
+    	    \item    
+    	        Then $\prod_{j=1}^n p_j < \prod_{j=1}^n 2^{2^j}=2^{2^{n+1}-2}<2^{2^{n+1}} $
+    	        
+    	        $\because$ $p_i \nmid (1+\prod_{j=1}^n p_j), i=1,2,\cdots,n$.
+    	        
+    	        $\therefore$ $\exists i_0>n$, which satisfies that $p_{i_0} \mid (1+\prod_{j=1}^n p_j)$
+    	        
+    	        $\because p_{n+1}\le p_{i_0}$
+    	        
+    	        $\therefore p_{n+1}<(1+\prod_{j=1}^n p_j)<2^{2^{n+1}}$
+    	        
+    	        From (a),(b) and (c), we can know that the former statement is true.
+    	 
+    	\end{enumerate}
+        
+    \end{proof}
+
+    \item
+    Prove that a plane divided by $n$ lines can be colored with only $2$ colors, and the adjacent regions have different colors.
+    \begin{proof}
+        To prove the statement,we first need to prove that $n$ lines can divide a plain into at most $\frac{n^2+n+1}{2}$ areas.
+        
+        \begin{enumerate}
+        	
+        	\item 
+        	    When $n=1$, one line can divide a plain into at most $2=\frac{1^2+1+1}{2}$ areas.
+        	\item
+        	    Assumes that when $n=k$, $k$ lines can divide a plain into at most $\frac{k^2+k+1}{2}$ areas.
+        	\item
+        	    Then when $n=k+1$, line No.$(k+1)$ can be divided into $(k+1)$ parts by the former $k$ lines.
+        	    So it can add at most $(k+1)$ areas to the plain.
+        	    So $(k+1)$ lines can divide a plain into at most $\frac{k^2+k+1}{2}+k+1=\frac{(k+1)^2+(k+1)+1}{2}$ areas.
+        	Therefore, it can be proved that $n$ lines can divide a plain into at most $\frac{n^2+n+1}{2}$ areas. 
+        \end{enumerate}
+    
+        Then we need to prove that to make sure adjacent areas have different colors, at most $\frac{n^2+n}{3}$
+        can be filled with the same color.
+        
+        It does not matter to assume that the lines are not parrallel. Assumes that there are $m_k$ areas with $k$ line segments or half-lines as their boundaries.
+        
+        Then $\sum_{j=1}^{n} m_j \le n^2 $.
+        
+        $\because m_2 < n$ $\therefore \sum_{j=1}^{n} m_j\le\frac{m_2}{3}+\frac{\sum_{j=2}^{n}jm_j}{3}\le\frac{n^2+n}{3}$
+        	
+        Considering that we have 2 colors, there should be not more than $\frac{2n^2+2n}{3}$ areas to be filled.
+        
+        Because $n$ lines can divide a plain into at most  $\frac{n^2+n+1}{2}$ areas, which is less than $\frac{2n^2+2n}{3}$, therefore we can prove that $n$ lines can be colored with only $2$ colors, and the adjacent regions have different colors.
+        
+    \end{proof}
+
+\end{enumerate}
+
+\vspace{20pt}
+
+\textbf{Remark:} You need to include your .pdf and .tex files in your uploaded .rar or .zip file.
+
+%========================================================================
+\end{document}
