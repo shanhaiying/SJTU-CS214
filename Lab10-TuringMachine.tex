@@ -1,0 +1,361 @@
+\documentclass[12pt,a4paper]{article}
+%\usepackage{ctex}
+\usepackage{amsmath,amscd,amsbsy,amssymb,latexsym,url,bm,amsthm}
+\usepackage{epsfig,graphicx,subfigure}
+\usepackage{enumitem,balance}
+\usepackage{wrapfig}
+\usepackage{mathrsfs,euscript}
+\usepackage[usenames]{xcolor}
+\usepackage{hyperref}
+\usepackage[vlined,ruled,linesnumbered]{algorithm2e}
+\usepackage{float}
+\usepackage{multirow}
+\usepackage{tikz}
+\usetikzlibrary{automata,positioning,arrows}
+
+\hypersetup{colorlinks=true,linkcolor=blue}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{exercise}{Exercise}
+\newtheorem*{solution}{Solution}
+\newtheorem{definition}{Definition}
+\theoremstyle{definition}
+
+
+
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+
+\newcommand{\postscript}[2]
+ {\setlength{\epsfxsize}{#2\hsize}
+  \centerline{\epsfbox{#1}}}
+
+\renewcommand{\baselinestretch}{1.0}
+
+\setlength{\oddsidemargin}{-0.365in}
+\setlength{\evensidemargin}{-0.365in}
+\setlength{\topmargin}{-0.3in}
+\setlength{\headheight}{0in}
+\setlength{\headsep}{0in}
+\setlength{\textheight}{10.1in}
+\setlength{\textwidth}{7in}
+\makeatletter \renewenvironment{proof}[1][Proof] {\par\pushQED{\qed}\normalfont\topsep6\p@\@plus6\p@\relax\trivlist\item[\hskip\labelsep\bfseries#1\@addpunct{.}]\ignorespaces}{\popQED\endtrivlist\@endpefalse} \makeatother
+\makeatletter
+\renewenvironment{solution}[1][Solution] {\par\pushQED{\qed}\normalfont\topsep6\p@\@plus6\p@\relax\trivlist\item[\hskip\labelsep\bfseries#1\@addpunct{.}]\ignorespaces}{\popQED\endtrivlist\@endpefalse} \makeatother
+
+\begin{document}
+\noindent
+
+%========================================================================
+\noindent\framebox[\linewidth]{\shortstack[c]{
+\Large{\textbf{Lab10-Turing Machine}}\vspace{1mm}\\
+Algorithm and Complexity (CS214), Xiaofeng Gao, Spring 2020.}}
+\begin{center}
+\footnotesize{\color{red}$*$ If there is any problem, please contact TA Yiming Liu. }
+
+\footnotesize{\color{blue}$*$ Name:Zehao Wang  \quad Student ID:518021910976 \quad Email: davidwang200099@sjtu.edu.cn}
+\end{center}
+
+\begin{enumerate}
+
+\item
+Design a one-tape TM $M$ that computes the function $f(x, y) = x \mod y$, where $x$ and $y$ are positive integers ($x > y$). The alphabet is $\{1, 0, \Box, \triangleright, \triangleleft\}$, and the inputs are $x$ 1's, $\Box$ and $y$ 1's. Below is the initial configuration for input $x=7$ and $y=3$. The result $z=f(x, y)$ should also be represented in the form of $z$ 1's on the tape with the pattern of $\triangleright 111 \cdots 111 \triangleleft$.
+\begin{center}
+	\begin{tabular}{ll|c|c|c|c|c|c|c|c|c|c|c|c|c|c}
+		& \multicolumn{14}{c}{Initial Configuration}\\[5pt]
+		\cline{2-16}
+		& & $\triangleright$ &  1  & 1 & 1 & 1 & 1 & 1 & 1 & $\Box$ & 1 & 1 & 1 & $ \triangleleft$ & \\
+		\cline{2-16}
+		\multicolumn{2}{c}{} & \multicolumn{1}{c}{$\uparrow$} & \multicolumn{11}{c}{}\\[-4px]
+		\multicolumn{2}{c}{} & \multicolumn{1}{c}{$q_S$} & \multicolumn{11}{c}{}	
+	\end{tabular}
+\end{center}
+
+\begin{enumerate}
+	\item
+	Please describe your design and then write the specifications of $M$ in the form like $\langle q_S, \triangleright \rangle \rightarrow \langle q_1, \triangleright,  R\rangle$. Explain the transition functions in detail.
+	
+	\item
+	Please draw the state transition diagram.
+	
+	\item
+	Show briefly and clearly the whole process from initial to final configurations for input $x = 7$ and $y = 3$. You may start like this:
+	$$(q_s,\underline{\triangleright}  1  1  1  1  1  1  1  \Box 1  1  1   \triangleleft)
+	\vdash (q_1,\triangleright  \underline{1}  1  1  1  1  1  1  \Box 1  1  1   \triangleleft)
+	\vdash^* (q_1,\triangleright  1  1  1  1  1  1  1  \underline{\Box} 1  1  1   \triangleleft)
+	\vdash (q_2,\triangleright  1  1  1  1  1  1  1  \Box \underline{1}  1  1   \triangleleft)$$
+	
+	\par{\color{blue}(Note that for simplicity, we write $(q_1,\triangleright  \underline{1}  1  1  1  1  1  1  \Box 1  1  1   \triangleleft)\vdash^* (q_1,\triangleright  1  1  1  1  1  1  1  \underline{\Box} 1  1  1   \triangleleft)$ if the corresponding transaction repeats on multiple inputs with the same state.)}
+	
+\end{enumerate}
+    \textbf{Solution.}
+    \begin{enumerate}
+    	\item 
+    	    The basic idea is continuously trying to subtract $y$ from $x$ when $y>x$. When $y<x$, this new $y$ is the result of $y\ mod\ x$.
+    	    
+    	    As for the operation on the Turing Machine, we first try to mark a $1$ in $y$ into $0$, which denotes that we want to subtract $1$ from $x$. Then we try to change a $1$ in $x$ into $\triangleright$, which means that we successfully subtract $1$ from $x$. We repeat the operation above. When the $1$'s in $y$ are all turned into $0$, we need to resume $y$ $0$'s into $1$'s. At this moment, we successfully subtract $y$ from $x$.
+    	    
+    	    Then we need to repeat the operation above until all the $1$'s in $x$ are turned into $\triangleright$. This time, the number of $0$'s in $y$ is $x\ mod\ y+1$. So we need to turn them into $1$ and use a pair of triangle to locate them.
+    	    
+    	    The transition function is as follows.
+    	    
+    	    $\langle q_S, \triangleright \rangle \rightarrow \langle q_1, \triangleright,  R\rangle$\quad
+    	    $\langle q_1, 1 \rangle \rightarrow \langle q_1, 1,  R\rangle$\quad
+    	    $\langle q_2, \triangleleft \rangle \rightarrow \langle q_6, \triangleleft,  L\rangle$\quad
+    	    
+    	    $\langle q_6, 0 \rangle \rightarrow \langle q_6, 1,  L\rangle$\quad
+    	    $\langle q_6, \Box \rangle \rightarrow \langle q_2, \Box,  R\rangle$\quad
+    	    $\langle q_2, 1 \rangle \rightarrow \langle q_3, 0,  L\rangle$\quad
+    	     
+    	    $\langle q_2, 0 \rangle \rightarrow \langle q_2, 0,  R\rangle$\quad
+    	    $\langle q_3, 0 \rangle \rightarrow \langle q_3, 0,  L\rangle$\quad
+    	    $\langle q_3, \Box \rangle \rightarrow \langle q_4, \Box,  L\rangle$\quad
+    	    
+    	    $\langle q_4, 1 \rangle \rightarrow \langle q_4, 1,  L\rangle$\quad
+    	    $\langle q_4, \triangleright \rangle \rightarrow \langle q_7, \triangleright,  R\rangle$\quad
+    	    $\langle q_7, 1 \rangle \rightarrow \langle q_1, \triangleright,  R\rangle$\quad
+    	    
+    	    $\langle q_7, \Box \rangle \rightarrow \langle q_8, \triangleright,  R\rangle$\quad
+    	    $\langle q_8, 0 \rangle \rightarrow \langle q_8, 0,  R\rangle$\quad
+    	    $\langle q_8, 1 \rangle \rightarrow \langle q_9,1,  L\rangle$\quad 
+    	    
+    	    $\langle q_9, 0 \rangle \rightarrow \langle q_5, \triangleleft,  L\rangle$\quad
+    	    $\langle q_5, 0 \rangle \rightarrow \langle q_5, 1,  R\rangle$\quad
+    	    $\langle q_5,\triangleright \rangle \rightarrow \langle q_H,\triangleright,R$
+    	    
+    	    $\langle q_1,\Box \rangle \rightarrow \langle q_2,\Box,R \rangle$
+    	    
+       	\item 
+       	    This picture is drawn with TiKZ.
+       	
+    	    \begin{tikzpicture}[>=latex,shorten >=1pt,auto]
+    	    \node [initial,draw,shape=circle](node 0) at (-4.5,0) {$q_s$};
+    	    \node [draw,shape=circle](node 1) at (-1.5,0) {$q_1$};
+    	    \node [draw,shape=circle](node 2) at (1.5,0) {$q_2$};
+    	    \node [draw,shape=circle](node 3) at (4.5,0) {$q_3$};
+    	    \node [draw,shape=circle](node 4) at (4.5,-3) {$q_4$};
+    	    \node [accepting,draw,shape=circle](node 5) at (-1.5,-6) {$q_H$};
+    	    \node [draw,shape=circle](node 7) at (1.5,-3) {$q_7$};
+    	    \node [draw,shape=circle](node 6) at (4.5,3) {$q_6$};
+    	    \node [draw,shape=circle](node 8) at (-1.5,-3) {$q_8$};
+    	    \node [draw,shape=circle](node 9) at (-4.5,-3) {$q_9$};
+    	    \node [draw,shape=circle](node 10) at (-4.5,-6) {$q_5$};
+    	    \path [->]
+    	    (node 0) edge [above] node {$\triangleright/\triangleright, R$}  (node 1)
+    	    (node 1) edge [loop above] node {$1/1,R$} (node 1)
+    	    (node 1) edge [above] node {$\Box/\Box,R$} (node 2)
+    	    (node 2) edge [loop below] node {$0/0,R$} (node 2)
+    	    (node 2) edge [bend left] node {$\triangleleft/\triangleleft,L$} (node 6)
+    	    (node 6) edge  node {$\Box/\Box,R$} (node 2)
+    	    (node 6) edge [loop right] node {$0/1,L$} (node 6)
+    	    (node 2) edge [below] node {$1/0,L$} (node 3)
+    	    (node 3) edge [loop right] node {$0/0,L$} (node 3)
+    	    (node 3) edge [right] node {$\Box/\Box,L$} (node 4)
+    	    (node 4) edge [loop right] node {$1/1,L$} (node 4)
+    	    (node 7) edge node {$1/\triangleright,R$} (node 1)
+    	    (node 4) edge node {$\triangleright/\triangleright,R$} (node 7)
+    	    (node 7) edge [below] node {$\Box/\triangleright,R$} (node 8)
+    	    (node 8) edge [loop below] node {$0/0,R$} (node 8)
+    	    (node 8) edge [below] node {$1/1,L$} (node 9)
+    	    (node 9) edge [left] node {$0/\triangleleft,L$} (node 10)
+    	    (node 10) edge [loop left] node {$0/1,L$} (node 10)
+    	    (node 10) edge [above] node {$\triangleright/\triangleright,R$} (node 5);
+    	    \end{tikzpicture}
+    	\item 
+    	    $$(q_s,\underline{\triangleright}  1  1  1  1  1  1  1  \Box 1  1  1   \triangleleft)
+    	    \vdash (q_1,\triangleright  \underline{1}  1  1  1  1  1  1  \Box 1  1  1   \triangleleft)
+    	    \vdash^* (q_1,\triangleright  1  1  1  1  1  1  1  \underline{\Box} 1  1  1   \triangleleft)
+    	    \vdash (q_2,\triangleright  1  1  1  1  1  1  1  \Box \underline{1}  1  1   \triangleleft)$$
+    	    
+    	    $$\vdash(q_3,\triangleright 1111111\underline{\Box}011\triangleleft)
+    	      \vdash(q_4,\triangleright 111111\underline{1}\Box011\triangleleft)
+    	      \vdash^*(q_4,\underline{\triangleright}1111111\Box011\triangleleft)
+    	      \vdash(q_7,\triangleright \underline{1}111111\Box011\triangleleft)$$
+    	      
+    	    $$\vdash(q_1,\triangleright\triangleright\underline{1}11111\Box011\triangleleft)
+    	    \vdash^*(q_1,\triangleright\triangleright111111\underline{\Box}011\triangleleft)
+    	    \vdash(q_2,\triangleright\triangleright111111\Box \underline{0}11\triangleleft)
+    	    \vdash(q_2,\triangleright\triangleright111111\Box0\underline{1}1\triangleleft)$$
+    	    
+    	    $$\vdash(q_3,\triangleright\triangleright111111\Box\underline{0}01\triangleleft)
+    	    \vdash(q_3,\triangleright\triangleright111111\underline{\Box}001\triangleleft)
+    	    \vdash(q_4,\triangleright\triangleright11111\underline{1}\Box001\triangleleft)
+    	    \vdash^*(q_4,\triangleright\underline{\triangleright}111111\Box001\triangleleft)$$
+    	    
+    	    $$\vdash(q_7,\triangleright\triangleright\underline{1}11111\Box001\triangleleft)
+    	    \vdash(q_1,\triangleright\triangleright\triangleright\underline{1}1111\Box001\triangleleft)
+    	    \vdash^*(q_1\triangleright\triangleright\triangleright11111\underline{\Box}001\triangleleft)
+    	    \vdash^*(q_2\triangleright\triangleright\triangleright11111\Box\underline{0}01)$$
+    	    
+    	    $$\vdash^*(q_2,\triangleright\triangleright\triangleright11111\Box00\underline{1}\triangleleft)
+    	    \vdash(q_3,\triangleright\triangleright\triangleright11111\Box0\underline{0}0\triangleleft)
+    	    \vdash^*(q_3,\triangleright\triangleright\triangleright11111\underline{\Box}000\triangleleft)
+    	    \vdash(q_4,\triangleright\triangleright\triangleright1111\underline{1}\Box000\triangleleft)$$
+    	    
+    	    $$\vdash^*(q_4,\triangleright\triangleright\underline{\triangleright}1111\Box000\triangleleft)
+    	    \vdash(q_7,\triangleright\triangleright\triangleright\underline{1}1111\Box000\triangleleft)
+    	    \vdash(q_1,\triangleright\triangleright\triangleright\triangleright\underline{1}111\Box000\triangleleft)
+    	    \vdash^*(q_1,\triangleright\triangleright\triangleright\triangleright1111\underline{Box}000\triangleleft)
+    	    $$
+    	    
+    	    $$\vdash(q_2,\triangleright\triangleright\triangleright\triangleright1111\Box\underline{0}00\triangleleft)
+    	    \vdash^*(q_2,\triangleright\triangleright\triangleright\triangleright1111\Box000\underline{\triangleleft})
+    	    \vdash(q_6,\triangleright\triangleright\triangleright\triangleright1111\Box00\underline{0}\triangleleft)
+    	    \vdash^*(q_6,\triangleright\triangleright\triangleright\triangleright1111\underline{\Box}111\triangleleft)
+    	    $$
+    	    
+    	    $$\vdash(q_2,\triangleright\triangleright\triangleright\triangleright1111\Box\underline{1}11\triangleleft)
+    	    \vdash(q_3,\triangleright\triangleright\triangleright\triangleright1111\underline{\Box}011\triangleleft)
+    	    \vdash(q_4,\triangleright\triangleright\triangleright\triangleright111\underline{1}\Box011\triangleleft)
+    	    \vdash^*(q_4,\triangleright\triangleright\triangleright\underline{\triangleright}1111\Box011\triangleleft)
+    	    $$
+    	    
+    	    $$\vdash(q_7,\triangleright\triangleright\triangleright\triangleright\underline{1}111\Box011\triangleleft)
+    	    \vdash(q_1,\triangleright\triangleright\triangleright\triangleright\triangleright\underline{1}11\Box011\triangleleft)
+    	    \vdash^*(q_1,\triangleright\triangleright\triangleright\triangleright\triangleright111\underline{\Box}011\triangleleft)
+    	    \vdash(q_2,\triangleright\triangleright\triangleright\triangleright\triangleright111\Box\underline{0}11\triangleleft)
+    	    $$
+    	    
+    	    $$\vdash(q_2,\triangleright\triangleright\triangleright\triangleright\triangleright111\Box0\underline{1}1\triangleleft)
+    	    \vdash(q_3,\triangleright\triangleright\triangleright\triangleright\triangleright111\Box\underline{0}01\triangleleft)
+    	    \vdash(q_3,\triangleright\triangleright\triangleright\triangleright\triangleright111\underline{\Box}001\triangleleft)
+    	    \vdash(q_4,\triangleright\triangleright\triangleright\triangleright\triangleright11\underline{1}\Box001\triangleleft)
+    	    $$
+    	    
+    	    $$\vdash^*(q_4,\triangleright\triangleright\triangleright\triangleright\underline{\triangleright}111\Box001\triangleleft)
+    	    \vdash(q_7,\triangleright\triangleright\triangleright\triangleright\triangleright\underline{1}11\Box001\triangleright)
+    	    \vdash(q_1,\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\underline{1}1\Box001\triangleleft)
+    	    \vdash^*(q_1,\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright11\underline{\Box}001\triangleleft)$$
+    	    
+    	    $$\vdash(q_2,\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright11\Box\underline{0}01\triangleleft)
+    	    \vdash^*(q_2,\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright11\Box00\underline{1}\triangleleft)
+    	    \vdash(q_3,\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright11\Box0\underline{0}0\triangleleft)
+    	    \vdash^*(q_3,\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright11\underline{\Box}000\triangleleft)
+    	    $$
+    	    
+    	    $$\vdash(q_4,\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright1\underline{1}\Box000\triangleleft)
+    	    \vdash^*(q_4,\triangleright\triangleright\triangleright\triangleright\triangleright\underline{\triangleright}11\Box000\triangleleft)
+    	    \vdash(q_7,\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\underline{1}1\Box000\triangleleft)
+    	    $$
+    	    
+    	    $$\vdash(q_1,\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\underline{1}\Box000\triangleleft)
+    	    \vdash(q_1,\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright1\underline{\Box}000\triangleleft)
+    	    \vdash(q_2,\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright1\Box\underline{0}00\triangleleft)
+    	    \vdash^*(q_2,\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright1\Box000\underline{\triangleleft})
+    	    $$
+    	    
+    	    $$\vdash(q_6,\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright1\Box00\underline{0}\triangleleft)
+    	    \vdash^*(q_6,\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright1\underline{\Box}111\triangleleft)
+    	    \vdash(q_2,\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright1\Box\underline{1}11\triangleleft)
+    	    \vdash(q_3,\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright1\underline{\Box}011\triangleleft)
+    	    $$
+    	    
+    	    $$\vdash(q_4,\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\underline{1}\Box011\triangleleft)
+    	    \vdash(q_4,\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\underline{\triangleright}1\Box011\triangleleft)
+    	    \vdash(q_7,\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\underline{1}\Box011\triangleleft)
+    	    \vdash(q_1,\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\underline{\Box}011\triangleleft)
+    	    $$
+    	    
+    	    $$\vdash(q_2,\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\Box\underline{0}11\triangleleft)
+    	    \vdash(q_2,\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\Box0\underline{1}1\triangleleft)
+    	    \vdash(q_3,\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\Box\underline{0}01\triangleleft)
+    	    \vdash(q_3,\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\underline{\Box}001\triangleleft)
+    	    $$
+    	    
+    	    $$\vdash(q_4,\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\underline{\triangleright}\Box001\triangleleft)
+    	    \vdash(q_7,\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\underline{\Box}001\triangleleft)
+    	    \vdash(q_8,\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\underline{0}01\triangleleft)
+    	    \vdash^*(q_8,\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright00\underline{1}\triangleleft)
+    	    $$
+    	    
+    	    $$\vdash(q_9,\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright0\underline{0}1\triangleleft)
+    	    \vdash(q_9,\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\underline{0}\triangleleft0\triangleleft)
+    	    \vdash(q_5,\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\underline{\triangleright}1\triangleleft0\triangleleft)
+    	    \vdash(q_H,\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\triangleright\underline{1}\triangleleft0\triangleleft)
+    	    $$
+    	    
+    \end{enumerate}
+		    
+
+	
+	
+
+
+\item Assume there's a Turing Machine $M$ using alphabet $\Gamma :\{ \triangleright, \Box, a, b, \cdots, z\}$. We can simulate $M$ by a Turing Machine $\tilde{M}$ using alphabet $\tilde{\Gamma }:\{ \triangleright, \Box, 0, 1\}$. Please transform the instruction $\langle q, i \rangle \rightarrow \langle q',j, R\rangle$ in $M$ into its corresponding form in $\tilde{M}$.
+
+\begin{solution}
+	There are 26 letters in English. Therefore to denote them in bits, each letter requires 5 bits. Assume that $a=00000$ and $z=11001$ and the letters are denoted with big endian method, that is, the most significant bit is on the left and the least significant one is on the right.
+	
+	Then to find out the current letter is $i$, the head should check these five bits. This require extra interim states. Then the head should change $i$ into $j$. This may also require extra interim states. $i$ is $01000$ and $j$ is $01001$. In this problem, we are luckily enough to have to change only one bit and thus fewer inerim states are necessary. However, on some unlucky occasions, the head may have to read the 5 bits, change the 5 bits and then move on to the next letter. These kind of cases require more interim states.
+	
+	In this problem, we need to introduce only 4 interim states. The head should check the 5 bits one by one to figure out the current letter is i and then change the least significant bit from $0$ to $1$.
+	
+	The transition function can be listed as follows.
+	
+	$\langle q,0 \rangle \rightarrow \langle q_1,0,R \rangle$\quad
+	$\langle q_1,1 \rangle \rightarrow \langle q_2,1,R \rangle $\quad
+	$\langle q_2,0 \rangle \rightarrow \langle q_3,0,R \rangle $\quad
+	
+	$\langle q_3,0 \rangle \rightarrow \langle q_4,0,R \rangle $\quad
+	$\langle q_4,0 \rangle \rightarrow \langle q',1,R \rangle $  
+\end{solution}
+
+\item \textbf{Wireless Data Broadcast System.}
+In a Wireless Data Broadcast System (WDBS), data items are repeatedly broadcasted in cycle on different channels. Denote $D = \{d_1, d_2,\cdots, d_k\}$ as data items, each $d_i$ with length $l_i$ (as time units), and $\mathbf{C}=\{C_1, C_2, \cdots, C_n\}$ as broadcasting channels. Fig.~\ref{Fig-Broadcast} illustrates a WDBS with 25 data items and 4 channels. Once a channel finishes broadcasting current cycle, it will repeat these data again as a new cycle. E.g., a possible broadcasting sequence of $C_1$ could be \{$d_6$, $d_{12}$, $d_1$, $d_{18}$, $d_7$, $d_6$, $d_{12}$, $d_1$, $d_{18}$, $d_7$, $\cdots$\}
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[scale=1]{Fig-Broadcast.pdf}
+	\caption{An Example Scenario of Wireless Data Broadcast System.} \label{Fig-Broadcast}
+\end{figure}
+
+If a mobile client requires a subset of data items $D_q \subseteq D$ from this WDBS, he/she must access onto one channel, wait for the appearance of one required item, and switch to another channel if necessary. Each ``switch'' requires one time slot. For example, Lucien wants to download $\{d_1, d_3, d_5\}$, as shown in Fig.~\ref{Fig-Access}. He firstly accesses onto $C_1$ at time slot 1, then download $d_1$, $d_3$ respectively during time slots 2 to 5, and then switch to $C_3$ at time slot 6 (note that he cannot download $d_5$ from $C_2$ because of the switch constraint), and download $d_5$ during time slots 7 to 8. We define \emph{access latency} as the period when a client starts downloading, till the time he/she finishes. As a result, the overall access latency for Lucien is 7 in this example.
+
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[scale= 0.5]{Fig-Access.pdf}
+	\caption{An Example Scenario of Query of a Client.} \label{Fig-Access}
+\end{figure}
+
+Each operation (download/wait/switch) needs energy consumption. To conserve energy, a client hopes to use minimum amount of energy to download all required items in $D_q$, which means that he/she waits to minimize both access latency and switch numbers. Unfortunately, these two objectives conflict with each other naturally. Fig.~\ref{Fig-Conflict} exhibits such a scenario. To download $D_q=\{d_1, d_2, d_3, d_4\}$, if we start from $C_2$, in Option 1 we can switch to $C_1$ for $d_1$ immediately after downloading $d_3$, return back to $C_2$ for $d_4$, and to $C_1$ again for $d_2$. Such option costs 3 switches and 7 access latency. While in Option 2, we stay at $C_2$ lazily for $d_3$ and $d_4$, and then switch to $C_1$ for $d_2$ and $d_1$. Such option costs 1 switches and 12 access latency.
+
+
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[scale= 0.5]{Fig-Conflict.pdf}
+	\caption{Confliction between Access Latency and Switch Number.} \label{Fig-Conflict}
+\end{figure}
+
+Once we want to minimize two conflictive objectives simultaneously, we have three possible ways (similar as Segmented Least Squares told in Dynamic Programming Lecture). Now it is your turn to complete the formulation of this optimization, we name it as Minimum Constraint Data Retrieval Problem (MCDR), with the following sub-questions.
+\begin{enumerate}
+	\item If we add an additional switch parameter $h$, please define the MCDR (Version 1) completely as a search problem.
+	\item If we add an additional latency parameter $t$, please define the MCDR (Version 2) completely as a search problem.
+	\item If we set dimensional parameters $\alpha$ to switch number, and $\beta$ to access latency, we can combine two objectives together linearly as a new concept ``cost''. Please define the Minimum Cost Data Retrieval Problem (MCDR, Version 3) correspondingly.
+	\item Please give the decision versions of sub-questions (a), (b) and (c).
+\end{enumerate}
+\begin{solution}
+	\begin{enumerate}
+		\item 
+		    Given a data set $D=\{d_1,d_2,\cdots,d_n\}$ and a channel set $C=\{c_1,c_2,\cdots,c_m\}$. Each piece of data $d_i$ has a length $L_i$ and lies in a channel $c_i$. We want to retrieve a subset: $D_q$, of $D$ from these channels. Try to find a method which has minimal data access latency and requires at most $h$ switches between the channels.
+		\item 
+		    Given a data set $D=\{d_1,d_2,\cdots,d_n\}$ and a channel set $C=\{c_1,c_2,\cdots,c_m\}$. Each piece of data $d_i$ has a length $L_i$ and lies in a channel $c_i$. We want to retrieve a subset: $D_q$, of $D$ from these channels. Try to find a method which requires minimal number of switches and has a data access latency of at most $t$.
+		\item 
+		    Given a data set $D=\{d_1,d_2,\cdots,d_n\}$ and a channel set $C=\{c_1,c_2,\cdots,c_m\}$. Each piece of data $d_i$ has a length $L_i$ and lies in a channel $c_i$. We want to retrieve a subset: $D_q$, of $D$ from these channels. Define $cost=\alpha\times switch\ number+\beta\times access\ latency$. Try to find a method which has minimal cost.
+		\item 
+		\ \\
+		    \begin{itemize}
+		    	\item 
+		    	    Question (a):Given a data set $D=\{d_1,d_2,\cdots,d_n\}$ and a channel set $C=\{c_1,c_2,\cdots,c_m\}$. Each piece of data $d_i$ has a length $L_i$ and lies in a channel $c_i$. We want to retrieve a subset: $D_q$, of $D$ from these channels. Is there a method which has a data access latency not more than $k$ and requires at most $h$ switches between the channels?
+		    	\item 
+		    	    Question (b):Given a data set $D=\{d_1,d_2,\cdots,d_n\}$ and a channel set $C=\{c_1,c_2,\cdots,c_m\}$. Each piece of data $d_i$ has a length $L_i$ and lies in a channel $c_i$. We want to retrieve a subset: $D_q$, of $D$ from these channels. Is there a method which requires not more than $k$ switches and has a data access latency of at most $t$?
+		    	\item 
+		    	    Question (c):Given a data set $D=\{d_1,d_2,\cdots,d_n\}$ and a channel set $C=\{c_1,c_2,\cdots,c_m\}$. Each piece of data $d_i$ has a length $L_i$ and lies in a channel $c_i$. We want to retrieve a subset: $D_q$, of $D$ from these channels. Define $cost=\alpha\times switch\ number+\beta\times access\ latency$. Is there a method whose cost is not more than $c_0$?
+		    \end{itemize}
+	\end{enumerate}
+\end{solution}
+\end{enumerate}
+
+%========================================================================
+\end{document}

@@ -1,0 +1,300 @@
+\documentclass[12pt,a4paper]{article}
+%\usepackage{ctex}
+\usepackage{amsmath,amscd,amsbsy,amssymb,latexsym,url,bm,amsthm}
+\usepackage{epsfig,graphicx,subfigure}
+\usepackage{enumitem,balance}
+\usepackage{wrapfig}
+\usepackage{mathrsfs,euscript}
+\usepackage[usenames]{xcolor}
+\usepackage{hyperref}
+\usepackage[vlined,ruled,linesnumbered]{algorithm2e}
+\hypersetup{colorlinks=true,linkcolor=black}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{exercise}{Exercise}
+\newtheorem*{solution}{Solution}
+\newtheorem{definition}{Definition}
+\theoremstyle{definition}
+
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+
+\newcommand{\postscript}[2]
+ {\setlength{\epsfxsize}{#2\hsize}
+  \centerline{\epsfbox{#1}}}
+
+\renewcommand{\baselinestretch}{1.0}
+
+\setlength{\oddsidemargin}{-0.365in}
+\setlength{\evensidemargin}{-0.365in}
+\setlength{\topmargin}{-0.3in}
+\setlength{\headheight}{0in}
+\setlength{\headsep}{0in}
+\setlength{\textheight}{10.1in}
+\setlength{\textwidth}{7in}
+\makeatletter \renewenvironment{proof}[1][Proof] {\par\pushQED{\qed}\normalfont\topsep6\p@\@plus6\p@\relax\trivlist\item[\hskip\labelsep\bfseries#1\@addpunct{.}]\ignorespaces}{\popQED\endtrivlist\@endpefalse} \makeatother
+\makeatletter
+\renewenvironment{solution}[1][Solution] {\par\pushQED{\qed}\normalfont\topsep6\p@\@plus6\p@\relax\trivlist\item[\hskip\labelsep\bfseries#1\@addpunct{.}]\ignorespaces}{\popQED\endtrivlist\@endpefalse} \makeatother
+
+\begin{document}
+
+\noindent
+
+%========================================================================
+\noindent\framebox[\linewidth]{\shortstack[c]{
+\Large{\textbf{Lab08-Graph Exploration}}\vspace{1mm}\\
+CS214-Algorithm and Complexity, Xiaofeng Gao, Spring 2020.}}
+\begin{center}
+\footnotesize{\color{red}$*$ If there is any problem, please contact TA Yiming Liu.}
+
+% Please write down your name, student id and email.
+\footnotesize{\color{blue}$*$ Name:Zehao Wang  \quad Student ID:518021910976 \quad Email: davidwang200099@sjtu.edu.cn}
+\end{center}
+
+\begin{enumerate}
+    \item
+    \textbf{BFS Tree.} Similar to DFS, BFS yields a tree, (also possibly forest, but \textbf{just consider a tree} in this question) and we can define \textbf{tree, forward, back, cross} edges for BFS. Denote $Dist(u)$ as the distance between node $u$ and the source node in the BFS tree. Please prove:
+    \begin{enumerate}
+    	\item For both undirected and directed graphs, no forward edges exist in the graph.
+    	
+    	\item There are no back edges in undirected graph, while in directed graph each back edge $(u,v)$ yields $0\leq Dist(v)\leq Dist(u)$.
+    	
+    	\item For undirected graph, each cross edge $(u,v)$ yields $|Dist(v)-Dist(u)|\le 1$, while for directed graph, each cross edge $(u,v)$ yields $Dist(v)\leq Dist(u)+1$.
+    	
+    \end{enumerate}
+\begin{solution}
+	\begin{enumerate}
+		\item
+			Forward edge is an edge $(u,v)$ where $v$ is a non-child descendant of $u$.
+		
+		    According to the implementation of BFS, any vertex $u$ and any vertex $v$, assumes that there is an edge $(u,v)$ connecting $u$ and $v$, and $v$ is discovered later than $u$.
+		    
+		    Then $v$ will be pushed into the queue when visiting $u$. 
+		    
+		    If one of the $u$'s descendants $w$, which also has an edge connected to $v$, is visited, $v$ will not be pushed into the queue again, which otherwise will generate a forwarding edge.
+		    
+		    Therefore in the BFS tree there is no forward edge.
+		\item  
+		    A backward edge is an edge $(u,v)$, where $u$ is a descendant of $v$.
+		    
+		    According to the implementation of BFS, descendants are discovered later than ancestors and thus visited later than ancestors.
+		    
+		    Moreover, in an undirected graph, if there is an edge connected a descendant with its ancestor, the ancestor will not be visited because BFS does not visit an already-visited vertex. Therefore this back edge will not be included into the BFS tree.
+		    
+		    Also, in BFS, $Dist(u)$ depends on how late $u$ is visited. the distance of an ancestor is smaller than its descendants.
+		    
+		    For a back edge $(u,v)$, $u$ is the descendant of $v$, so $0 \leq Dist(v) \leq Dist(u)$.
+		\item 
+		    According to the implementation of BFS, BFS discovers the shortest path from source vertex to all other vertexes.
+		    
+		    If $Dist(v)>Dist(u)+1$, then there is a path $src \rightarrow u \rightarrow v$, the length of which is $Dist(u)+1$, shorter than $Dist(u)$, which contradicts to the assumption that $Dist(v)$ is the length of the shortest path from source vertex to $v$.
+		    
+		    Similarly, we can also prove that $Dist(u)>Dist(v)+1$ is impossible.
+		    
+		    Therefore for an undirected graph, $|Dist(v)-Dist(u)|\le 1$.
+		    
+		    As for directed graph, because it is not sure whether there is an edge from $v$ to $u$, we can only make sure $Dist(v)\leq Dist(u)+1$.
+	\end{enumerate}
+\end{solution}
+
+    \item 
+    \textbf{Articulation Points, Bridges, and Biconnected Components.} Let $G=(V, E)$ be a connected, undirected graph. An articulation point of $G$ is a vertex whose removal disconnects $G$. A bridge of $G$ is an edge whose removal disconnects $G .$ A biconnected component of $G$ is a maximal set of edges such that any two edges in the set lie on a common simple cycle. Figure\ref{def} illustrates these definitions. We can determine articulation points, bridges, and biconnected components using depth-first search. Let $G_{\pi}=\left(V, E_{\pi}\right)$ be a depth-first tree of $G$. Please prove:
+    
+    \begin{enumerate}
+    	\item The root of $G_{\pi}$ is an articulation point of $G$ if and only if it has at least two children in $G_{\pi}$.
+    	\item An edge of $G$ is a bridge if and only if it does not lie on any simple cycle of $G$.
+    	\item The biconnected components of $G$ partition the nonbridge edges of $G$.
+    \end{enumerate}
+    \begin{solution}
+    	\begin{enumerate}
+    		\item 
+    		    According to the definition of DFS, DFS first visit a source vertex which serves as the root, then  calls $Explore(v)$ on each $v$ of the root's neighbors if $v$ is not visited.
+    		    
+    		    It has been proved that $Explore(v)$ will visit all the vertexes to which there is a path from $v$.
+    		    
+    		    Therefore in the DFS tree, all the subtrees, whose roots are neighbors of the source vertex, are disconnected.
+    		    
+    		    Therefore if the root has at least two children, then the two subtrees with them as roots are disconnected. And removing the root will cause these subtrees disconnected.
+    		    
+    		    If there is only one child in the DFS tree, then calling $Explore(u)$ on the root will make all the vertexes in the graph get visited, therefore the root is not an articulation point.
+    		    
+    		    Therefore, The root of $G_{\pi}$ is an articulation point of $G$ if and only if it has at least two children in $G_{\pi}$.
+    		\item 
+    		    We can prove this statement by proving 
+    		    \begin{enumerate}
+    		    	\item 
+    		    	    If an edge lies on a simple cycle of $G$, it is not a bridge.
+    		    	\item 
+    		    	    If an edge is a bridge, it does not lie on any simple cycle of $G$.
+    		    \end{enumerate}
+    	        \begin{itemize}
+    	        	\item 
+    	        	    Assumes that an edge $(u,v)$ lies on a simple cycle and vertexes <$u_1, u_2, \cdots, u_n, u, v$> forms this simple cycle.
+    	        	    
+    	        	    if we remove $(u,v)$, then $<u,u_n,u_{n-1},\cdots,u_1,v>$ is another path connecting $u$ and $v$.
+    	        	    
+    	        	    All the paths including $(u,v)$ or $(v,u)$ can include the paths above instead, and the connectivity does not change.
+    	        	    
+    	        	    Therefore removing $(u,v)$ does not disconnect this graph, and thus $(u,v)$ is not a bridge.
+    	        	    
+    	        	    Therefore if an edge lies on a simple cycle of $G$, it is not a bridge.
+    	        	\item 
+    	        	    Assumes that an edge $(u,v)$ is a bridge but it also lies on a certain simple cycle <$u_1,u_2,\cdots,u_{n},u,v$>.
+    	        	    
+    	        	    According to the definition of bridge, removing $(u,v)$ can disconnect this graph.
+    	        	    
+    	        	    However, $<u,u_n,u_{n-1},\cdots,u_1,v>$ is another path connecting $u$ and $v$.
+    	        	    
+    	        	    All the paths including $(u,v)$ or $(v,u)$ can include the paths above instead, and the connectivity does not change.
+    	        	    
+    	        	    This is contradictory to the assumption that $(u,v)$ is a bridge.
+    	        	    
+    	        	    Therefore if an edge is a bridge, it does not lie on any simple cycle of $G$.
+    	        	    
+    	        \end{itemize}
+            \item 
+                We need to prove:
+                \begin{enumerate}
+                	\item 
+                	    Bridge edges are not in any biconnected component in the graph.
+                	\item 
+                	    A non-bridge edge is in at least one biconnected component and in only one biconnected component, which is the meaning of "partition".
+                \end{enumerate}
+                \begin{itemize}
+                	\item 
+                	    From (b) we can know that bridge edges must not lie on a simple cycle of $G$ and thus are not in any biconnected component in the graph.
+                	\item 
+                	    From the definition of non-bridge edges, we can know that they must lie on at least one simple cycle.
+                	    
+                	    Assume that a non-bridge edge $(u,v)$ lies in two biconnected components, that is two simple cycles, which are <$u_1,u_2,\cdots,u_n,u,v$> and <$v_1,v_2,\cdots,v_n,u,v$>.
+                	    
+                	    Then <$u_1,u_2,\cdots,u_n,u,v_1,v_2,\cdots,v_n,v$> form a new simple cycle.
+                	    
+                	    This means that the two smaller cycles can form a new bigger simple cycle, aka a new biconnected component.
+                	    
+                	    Therefore a non-bridge edge is in at least one biconnected component and in only one biconnected component.
+                \end{itemize}
+            
+                Therefore, The biconnected components of $G$ partition the nonbridge edges of $G$.
+    	\end{enumerate}
+    \end{solution}
+
+	 \begin{figure}[htbp]
+	 	
+		\centering
+		\includegraphics[width=6in]{Fig-Definition.pdf}
+		\caption{The definition of articulation points, bridges, and biconnected components. The articulation points are the heavily shaded vertexes, the bridges are the heavily shaded edges, and the biconnected components are the edges in the shaded regions, with a \textit{bcc} numbering shown.}
+		\label{def}
+	\end{figure}
+
+    \item
+    Suppose $G=(V, E)$ is a \textbf{Directed Acyclic Graph} (DAG) with positive weights $w(u, v)$ on each edge. Let $s$ be a vertex of $G$ with no incoming edges and assume that every other node is reachable from $s$ through some path.
+    
+    \begin{enumerate}
+    	\item
+    	Give an $O(|V|+|E|)$-time algorithm to compute the shortest paths from $s$ to all the other vertexes in $G$. Note that this is faster than Dijkstra's algorithm in general.
+    	\item
+    	Give an efficient algorithm to compute the longest paths from $s$ to all the other vertexes.
+    \end{enumerate}
+    \textbf{Solution.}
+    
+        \begin{enumerate}
+        	\item 
+        	    An algorithm based on BFS will have a time complexity of $O(|V|+|E|)$. The space complexity is $O(|V|)$.
+        	    
+        	    When visiting a vertex $u$, try to update the distance of each of its neighbors $v$ with $dist[u]+w(u,v)$. If $dist[u]+w(u,v)<dist[v]$, then the update is feasible. Otherwise $dist[v]$ must not be updated.
+        	    
+        	    \begin{minipage}[t]{0.85\textwidth}
+        	    	\begin{algorithm}[H]
+        	    		%\algsetup{footnotesize}
+        	    		%\scriptsize
+        	    		\KwIn{Graph $G=(V,E)$, which is a DAG.}
+        	    		\KwOut{Distance from source:$dist[u]$ and predecessor:$pred[u]$ for all vertexes $u$ reachable from $s$.}
+        	    		\BlankLine
+        	    		\caption{ShortestPaths(G,s)}
+        	    		\label{Alg-spdag}
+        	    		$inqueue[|V|]$\;
+        	    		\ForEach{$u \in V$}{
+        	    		    $dist[u] \leftarrow +\infty$\;
+        	    		    $inqueue[u] \leftarrow 0$\;
+            		    }
+            	    	$dist[s] \leftarrow 0$\;
+            	    	$inqueue[s]\leftarrow 1$\;
+            	    	$Q \leftarrow [s]$\;
+            	    	\While{$Q\ is\ not\ empty$}{
+            	    	    $u \leftarrow dequeue(Q)$\;
+            	    	    $inqueue[u] \leftarrow 0$\;
+            	    	    \ForEach{$(u,v) \in E$}{
+            	    	        \If{$dist[u] \neq +\infty$ and $dist[v]>dist[u]+w(u,v)$}{
+            	    	            $dist[v] \leftarrow dist[u]+w(u,v)$\;
+            	    	            $pred[v] \leftarrow u$\;
+            	    	            \If{$inqueue[v]=0$}{
+            	    	            	$enqueue(Q,v)$\;
+            	    	            	$inqueue[v]\leftarrow 1$\;
+            	    	            }  
+                	            }
+                	        } 
+                	    }
+        	    		\Return $dist[\ ]$, $pred[\ ]$\;
+        	    	\end{algorithm}
+        	    \end{minipage}
+        	\item 
+        	    An algorithm based on topological sort is an efficient algorithm to solve this problem.
+        	    
+        	    the topological sort has $O(|V|+|E|)$ time complexity and the relaxation has $O(|E|)$ time complexity. 
+        	    
+        	    Therefore the total time complexity is $O(|V|+|E|)$. The space complexity is $O(|V|)$.
+        	    
+        	    \begin{minipage}[t]{0.85\textwidth}
+        	    	\begin{algorithm}[H]
+        	    		\KwIn{Graph $G=(V,E)$, which is a DAG.}
+        	    		\KwOut{Distance from source:$dist[u]$ and predecessor:$pred[u]$ for all vertexes $u$ reachable from $s$.}
+        	    		\BlankLine
+        	    		\caption{LongestPaths(G,s)}
+        	    		\label{Alg-lpdag}
+        	    		$topo[|V|]$\;
+        	    		$outDegree[|V|]$\;
+        	    		$rank\leftarrow 0$\;
+        	    		\ForEach{$u \in V$}{
+        	    			$dist[u] \leftarrow -\infty$\;
+        	    			$inDegree[u] \leftarrow the\ number\ of\ edges\ pointing\ to\ u$\;
+        	    		}
+        	    		$dist[s] \leftarrow 0$\;
+        	    		$topo[rank]\leftarrow s$\;
+        	    		
+        	    		\While{$rank \neq |V|-1$}{
+        	    			$u \leftarrow topo[rank]$\;
+        	    		    \For{$(u,v) \in E$}{
+        	    		        $inDegree[v] \leftarrow inDegree[v]-1$\;
+        	    		        \If{$inDegree[v]=0$}{
+        	    		        	$rank \leftarrow rank+1$\;
+        	    		            $topo[rank] \leftarrow v$\;
+            		            }
+            		        }
+            		    }
+        	    		
+        	    		\For{$rank=0\ to\ |V|-1 $}{
+        	    			$u \leftarrow topo[rank]$\;
+        	    			\ForEach{$(u,v) \in E$}{
+        	    				\If{$dist[v]<dist[u]+w(u,v)$}{
+        	    					$dist[v] \leftarrow dist[u]+w(u,v)$\;
+        	    					$pred[v] \leftarrow u$\;
+        	    				}
+        	    			} 
+        	    		}
+        	    		\Return $dist[\ ]$, $pred[\ ]$\;
+        	    	\end{algorithm}
+        	    \end{minipage}
+        	         
+        \end{enumerate}
+    
+\end{enumerate}
+
+\vspace{20pt}
+
+\textbf{Remark:} You need to include your .pdf and .tex files in your uploaded .rar or .zip file.
+
+%========================================================================
+\end{document}

@@ -1,0 +1,339 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage{ctex}
+\usepackage{amsmath,amscd,amsbsy,amssymb,latexsym,url,bm,amsthm}
+\usepackage{epsfig,graphicx,subfigure}
+\usepackage{enumitem,balance}
+\usepackage{wrapfig}
+\usepackage{mathrsfs,euscript}
+\usepackage[usenames]{xcolor}
+\usepackage{hyperref}
+\usepackage[vlined,ruled,linesnumbered]{algorithm2e}
+\hypersetup{colorlinks=true,linkcolor=black}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{exercise}{Exercise}
+\newtheorem*{solution}{Solution}
+\newtheorem{definition}{Definition}
+\theoremstyle{definition}
+
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+
+\newcommand{\postscript}[2]
+ {\setlength{\epsfxsize}{#2\hsize}
+  \centerline{\epsfbox{#1}}}
+
+\renewcommand{\baselinestretch}{1.0}
+
+\setlength{\oddsidemargin}{-0.365in}
+\setlength{\evensidemargin}{-0.365in}
+\setlength{\topmargin}{-0.3in}
+\setlength{\headheight}{0in}
+\setlength{\headsep}{0in}
+\setlength{\textheight}{10.1in}
+\setlength{\textwidth}{7in}
+\makeatletter \renewenvironment{proof}[1][Proof] {\par\pushQED{\qed}\normalfont\topsep6\p@\@plus6\p@\relax\trivlist\item[\hskip\labelsep\bfseries#1\@addpunct{.}]\ignorespaces}{\popQED\endtrivlist\@endpefalse} \makeatother
+\makeatletter
+\renewenvironment{solution}[1][Solution] {\par\pushQED{\qed}\normalfont\topsep6\p@\@plus6\p@\relax\trivlist\item[\hskip\labelsep\bfseries#1\@addpunct{.}]\ignorespaces}{\popQED\endtrivlist\@endpefalse} \makeatother
+
+\begin{document}
+
+\noindent
+
+%========================================================================
+\noindent\framebox[\linewidth]{\shortstack[c]{
+\Large{\textbf{Lab04-Matroid}}\vspace{1mm}\\
+CS214-Algorithm and Complexity, Xiaofeng Gao, Spring 2020.}}
+\begin{center}
+\footnotesize{\color{red}$*$ If there is any problem, please contact TA Yiming Liu.}
+
+% Please write down your name, student id and email.
+\footnotesize{\color{blue}$*$ Name:Zehao Wang  \quad Student ID:518021910976 \quad Email: davidwang200099@sjtu.edu.cn}
+\end{center}
+
+\begin{enumerate}
+\item Give a directed graph $G=(V,E)$ whose edges have integer weights. Let $w(e)$ be the weight of edge $e\in E$. We are also given a constraint $f(u)\geq 0$ on the out-degree of each node $u\in V$. Our goal is to find a subset of edges with maximal weight, whose out-degree at any node is no greater than the constraint.
+	\begin{enumerate}
+	    \item Please define independent sets and prove that they form a matroid.
+	    \item Write an optimal greedy algorithm based on Greedy-MAX in the form of \emph{pseudo code}.
+	    \item Analyze the time complexity of your algorithm.
+	\end{enumerate}
+    \begin{solution}
+    	\ \\
+    	\begin{enumerate}
+    		\item 
+    		    Define sets of edges $S\subset E$, whose out-degree at any node is not more than $f(\cdot)$, as independent sets, and $\mathbb{C}$ as a collection of such $S$.
+    		    
+    		    \textbf{Proof.}
+    		    \begin{itemize}
+    		    	\item 
+    		    	For any set of edges $B$ and each of its subset $A$, The number of edges in $A$ is not more than $B$. Therefore the out-degree of any node due to the edges in $A$ is not more than that due to $B$.
+    		    	Therefore the heredity is satisfied.
+    		    	\item 
+    		    	Assume that there does not exist $A,B\subseteq \mathbb{C}$ $x\in B\setminus A$,$|A|<|B|$, $A\cup \{x\}\in \mathbb{C} $.
+    		    	
+    		    	Because $|A|<|B|$, therefore $|B\setminus A|\ge 0$.
+    		    	
+    		    	Therefore 
+    		    	\begin{equation}\label{L1}
+    		    	    \forall x \in B \setminus A, A\cup\{x\} \notin \mathbb{C}
+    		    	\end{equation}
+    		    	
+    		    	Define $d_A(k)$ to be the out-degree of the $k$-th node in $V$ due to the edges in $A$ and $d_B(k)$ to be the out-degree of the $k$-th node in $V$ due to the edges in $B$.
+    		    	
+    		    	Because $B\in \mathbb{C}$, therefore 
+    		    	
+    		    	\begin{equation}\label{L2}
+    		    	    \sum_{k=1}^{|V|} d_B(k) \le \sum_{k=1}^{|V|} f(v_k)
+    		    	\end{equation}
+    		    	
+    		    	According to (\ref{L1}), we can know that no edges in $B$ can promise that the out-degree of each node in $V$ is less than $f(\cdot)$.Therefore $\forall v_k\in V$,$d_A(k)=f(v_k)$.
+    		    	
+    		    	Therefore 
+    		    	\begin{equation}\label{L3}
+    		    	    \sum_{k=1}^{|V|} d_A(k)=\sum_{k=1}^{|V|} f(v_k)
+    		    	\end{equation}
+    		    	
+    		    	Because each edge can make a contribution of only one out-degree, therefore $|A|=\sum_{k=1}^{|V|} f(v_k)$.
+    		    	
+    		    	According to (\ref{L2}) and (\ref{L3}), $|B|\le \sum_{k=1}^{|V|} f(v_k)<|A|$, which is contradictory to the assumption that $|A|<|B|$.
+    		    	
+    		    	Therefore, $\exists x \in B\setminus A$, $A\cup \{x\} \in \mathbb{C}$, which means the exchange property is satisfied.
+    		    \end{itemize}
+    	            Therefore $(S,\mathbb{C})$ is a matroid.
+    	    \item 
+    	        Maintain a set of edges $A$ and initialize it to be $\phi$.
+    	    
+    	        First sort the edges in $E$ by weight in non-increasing order, then examine the edges from the first to the last. 
+    	        
+    	        If the newly-examined edge will not break the constraint on out-degrees, then add it to $A$.
+    	        
+    	        Else discard it and go on to the next one.
+    	        
+    	        \begin{minipage}[t]{0.90\textwidth}
+    	        	\begin{algorithm}[H]
+    	        		\KwIn{$E[1,\cdots,n_e],n_e,n_v,f[1,\cdots,n_v]$}
+    	        		\KwOut{Set of edges $A$, which has the maximal weight.}
+    	        		\BlankLine
+    	        		\caption{getMaxWeight($E[1,\cdots,n_e],n_e,n_v,f[1,\cdots,n_v]$)}
+    	        		\label{Alg-getMaxWeight}
+    	        		
+    	        		Sort $E[1,\cdots,n_e]$ by weight in non-increasing order.
+    	        		
+    	        		$A \leftarrow \phi$\;
+    	        		
+    	        		$outDegree[1,\cdots,n_v]\leftarrow \{0\}$\;
+    	        		
+    	        		\For{$i=1\ to\ n_e$}{
+    	        		    \If{$outDegree[rank\ of\ startpoint\ of\ E[i]] \le f[i]$}{
+    	        		    	$A\leftarrow A\cup \{E[i]\}$\;
+            		    	}
+            		    }
+    	        		
+    	        		\Return{$A$}\;
+    	        		
+    	        	\end{algorithm}
+    	        \end{minipage}
+            \item 
+                The sort has a time complexity of $O(|E|\log |E|)$.
+                
+                The for-loop should be executed $|E|$ times, and each loop has a complexity of $O(1)$ to check the out-degree, which is $O(|E|)$ in total.
+                
+                Therefore the time complexity of this algorithm is $O(|E|\log |E|)$.
+                
+                The space complexity of this algorithm is $O(|V|+|E|)$.
+    		        
+    	\end{enumerate}
+       
+    \end{solution}
+
+
+\item Let $X$, $Y$, $Z$ be three sets. We say two triples $\left(x_{1}, y_{1}, z_{1}\right)$ and $\left(x_{2}, y_{2}, z_{2}\right)$ in $X \times Y \times Z$ are \textit{disjoint} if $x_{1} \neq x_{2}$, $y_{1} \neq y_{2},$ and $z_{1} \neq z_{2}$. Consider the following problem:
+    
+    \begin{definition}[MAX-3DM] 
+        Given three disjoint sets $X$, $Y$, $Z$ and a nonnegative weight function $c(\cdot)$ on all triples in $X \times Y \times Z$, \textbf{Maximum 3-Dimensional Matching} (MAX-3DM) is to find a collection $\mathcal{F}$ of disjoint triples with maximum total weight.
+    \end{definition}
+
+    \begin{enumerate}
+    	\item Let $D = X \times Y \times Z$. Define independent sets for MAX-3DM.
+    	\item Write a greedy algorithm based on Greedy-MAX in the form of \emph{pseudo code}. \label{Item-Greedy}
+    	\item Give a counterexample to show that your Greedy-MAX algorithm in Q.~\ref{Item-Greedy} is not optimal.
+    	\item Show that: $\max\limits_{F \subseteq D} \frac{v(F)}{u(F)} \leq 3$. {\color{blue}(Hint: you may need Theorem~\ref{Thm-Intersect} for this subquestion.)} 
+    \end{enumerate}
+    \begin{theorem} \label{Thm-Intersect}
+        Suppose an independent system $(E, \mathcal{I})$ is the intersection of $k$ matroids $\left(E, \mathcal{I}_{i}\right)$, $1 \leq i \leq k$; that is, $\mathcal{I}=\bigcap_{i=1}^{k} \mathcal{I}_{i}$. Then $\max\limits_{F \subseteq E} \frac{v(F)}{u(F)} \leq k$, where $v(F)$ is the maximum size of independent subset in $F$ and $u(F)$ is the minimum size of maximal independent subset in $F$.
+    \end{theorem}
+ 
+    \begin{solution}
+    	\begin{enumerate}
+    		\item
+    		    Define sets of triples $S$, any two members of which are disjoint, to be independent sets.
+    		\item 
+    		    For any given set of disjoint triples $S$, sort its members by weight in non-increasing order.
+    		    
+    		    Maintain a set $A$ and initialize it to be $\phi$.
+    		    
+    		    Examine the members in $S$ from the first to the last. If the newly-examined number is disjoint with all the members in $A$, then add it to $A$.
+    		    
+    		    Else discard it and go on to examine the next one.
+    		    
+    		    \begin{minipage}[t]{0.90\textwidth}
+    		    	\begin{algorithm}[H]
+    		    		\KwIn{$triple[1,\cdots,n],n,weight[1,\cdots,n]$}
+    		    		\KwOut{Set of disjoint triples $A$, which has the maximal weight.}
+    		    		\BlankLine
+    		    		\caption{MAX3DM($E[1,\cdots,n_e],n_e,n_v,f[1,\cdots,n_v]$)}
+    		    		\label{Alg-MAX3DM}
+    		    		
+    		    		Sort $triple[1,\cdots,n]$ by weight in non-increasing order.
+    		    		
+    		    		$A \leftarrow \phi$\;
+    		    		
+    		    		\For{$i=1\ to\ n$}{
+    		    			\If{$triple[i]\ is\ disjoint\ with\ all\ members\ in\ A$}{
+    		    				$A\leftarrow A\cup \{triple[i]\}$\;
+    		    			}
+    		    		}
+    		    		
+    		    		\Return{$A$}\;
+    		    		
+    		    	\end{algorithm}
+    	    \end{minipage} 
+            \item 
+                Considering a set $S$={($x_0,y_0,z_0$),($x_0,y_1,z_1$),($x_1,y_0,z_2$),($x_2,y_2,z_0$)} and the weight of ($x_0,y_0,z_0$) is $2$ and that of the others are $1$.
+                
+                Greedy-MAX will choose ($x_0,y_0,z_0$) only and get a total weight of $2$.
+                
+                But the optimal way is choosing the other 3 and get a total weight of $3$.
+                
+                This is a counterexample to show Greedy-MAX is not the optimal algorithm.
+            \item 
+                Define $S_x,S_y,S_z$ to be sets of triples any two members of which have different $x$'s,$y$'s and $z$'s separately.$\mathcal{I}_x, \mathcal{I}_y, \mathcal{I}_z$ are the collection of $S_x$, $S_y$ and $S_z$.Then we can prove $(S_x,\mathcal{I}_x), (S_y,\mathcal{I}_y)$ and $(S_z,\mathcal{I}_z)$ are all matroids.
+                \begin{itemize}
+                	\item 
+                
+                For $(S_x,\mathcal{I}_x)$, obviously its heredity is satisfied.
+                    \item
+                For two sets $A,B \in \mathcal{I}_x$ ($|A|<|B|$), there are at most $|A|$ elements in $B$ which may have the same $x$ as different elements in $A$. Some of the $|A|$ elements are in $B\cap A$ and the others are in $B\setminus A$. Otherwise, there will be $2$ or more elements having the same $x$ in $B$, which is contradictory to the definition of $B$.
+                
+                Therefore the remaining  elements do not have the same $x$ as any element in $A$. Therefore $\exists e\in B\setminus A$, $A\cup\{e\}\in \mathcal{I}_x$. This means the exchange property is satisfied.
+                    \item 
+                Therefore $(S_x,\mathcal{I}_x)$ is a matroid.
+                    \item 
+                Similarly, $(S_y,\mathcal{I}_y)$ and $(S_z,\mathcal{I}_z)$ are both matroids, too.
+                    \item 
+                By definition, the intersection of $\mathcal{I}_x$, $\mathcal{I}_y$, and $\mathcal{I}_z$ is the collection of set $S$, any two members of which have different $x$'s, $y$'s and $z$'s, which is $\mathcal{I}$.
+            \end{itemize}
+                Therefore $\mathcal{I}$ is an intersection of $3$ matroids.
+                
+                According to Theorem~\ref{Thm-Intersect}, $\max\limits_{F \subseteq D} \frac{v(F)}{u(F)} \leq 3$.
+            \end{enumerate}
+    \end{solution}
+
+
+
+	\item
+	\textbf{Crowdsourcing} is the process of obtaining needed services, ideas, or content by soliciting contributions from a large group of people, especially an online community. Suppose you want to form a team to complete a crowdsourcing task, and there are $n$ individuals to choose from. Each person $p_i$ can contribute $v_i$ ($v_i > 0$) to the team, but he/she can only work with up to $c_i$ other people. Now it is up to you to choose a certain group of people and maximize their total contributions ($\sum_i{v_i}$).
+	
+	\begin{enumerate}
+		\item Given $\text{OPT}(i, b, c)=$ maximum contributions when choosing from $\{p_1, p_2, \cdots, p_i\}$ with $b$ persons from $\{p_{i+1}, p_{i+2}, \cdots, p_n\}$ already on board and at most $c$ seats left before any of the existing team members gets uncomfortable. Describe the optimal substructure as we did in class and write a recurrence for $\text{OPT}(i, b, c)$.
+		\item Design an algorithm to form your team using dynamic programming, in the form of \emph{pseudo code}.
+        \item Analyze the time and space complexities of your design.
+	\end{enumerate}
+    \textbf{Solution.}
+    
+    	\begin{enumerate}
+    	\item 
+    	    \begin{itemize}
+    	    	\item
+    	    	    If OPT select $p_i$, it must be satisfied that $p_i$ can cooperate with the already-chosen $b$ people, namely $c_i\ge b$, and there is at least one seat for $p_i$, namely $c\ge 1$. Then the number of remaining seats is $min\{c_i,c\}$. This time $v_i$ needs to be taken into account.
+    	    	\item 
+    	    	    OPT can also choose not to chose $p_i$ even if $p_i$ can be chosen. Then whether to choose $p_i$ depends on the contribution.
+    	    	\item 
+    	    	    If OPT must not select $p_i$, that is because $p_i$ can not cooperate with the already-chosen $b$ people, namely $c_i<b$.
+    	    	\item 
+    	    	    In special cases when $i=0$, OPT has no person to choose. Therefore the answer is $0$.
+    	    \end{itemize}
+        
+    	    \begin{equation*}
+    	        \text{OPT}(i, b, c)=
+    	        \begin{cases}
+    	            max\{\text{OPT}(i-1,b,c),\\v_i+\text{OPT}(i-1,b+1,min\{c_i-b,c-1\})\}&(i\ge 1,c\ge 1,b\le c_i)\\
+    	            \text{OPT}(i-1, b, c)&(b>c_i,i\ge 1,c\ge 1)\\
+    	            0&(i=0\ or\ c=0)
+    	        \end{cases}
+    	    \end{equation*}
+    	    
+    	\item 
+    	    The number of group members is at most the $c_i$ of a certain group member.Therefore we can assume the group capacity to be each $c_i$ of these $n$ candidates and find out when we can get the maximal contribution.
+    	    
+    	    Once we assume the group capacity is an arbitrary value, use greedy strategy to choose as many members with greatest contributions into the group and add their contributions together.A member must not be chosen iff his or her $c_i$ is smaller than the capacity.
+    	    
+    	    Then we get $n$ "maximal" value when the capacity is $c_n,c_{n-1},\cdots,c_1$ separately. Choose the maximum and execute the greedy strategy above again to find out who are the members. 
+    	    
+    	    \begin{minipage}[t]{0.90\textwidth}
+    	    	\begin{algorithm}[H]
+    	    		\KwIn{$v[1,\cdots,n],c[1,\cdots,n],n$}
+    	    		\KwOut{Set of people $A$, which has the most contribution.}
+    	    		\BlankLine
+    	    		\caption{Crowdsource($v[1,\cdots,n],c[1,\cdots,n],n$)}
+    	    		\label{Alg-Crowdsource}
+    	    		
+    	    		Sort $v[1,\cdots,n]$ in non-decreasing order and make $c[i]$ and $v[i]$ belong to $p_i$.
+    	    	
+    	    		$w[1,\cdots,n]$, each element of which is initialized as $0$\;
+    	    		
+    	    		$max\leftarrow 0$\;
+    	    		
+    	    		$rankMax\leftarrow 0$\;
+    	    		
+    	    		\For{$i=n\ to\ 1$}{
+    	    			$capacity \leftarrow c[i]$\;
+    	    			$j \leftarrow n$\;
+    	    		    \While{$capacity>0\ and\ j\ge 1$}{
+    	    		        \If{$c[j]\ge c[i]$}{
+        	                        $w[i]\leftarrow w[i]+v[j]$\;
+        	                        $capacity\leftarrow capacity-1$\;
+        		            }
+        	                $j\leftarrow j-1$\;
+        		        }
+        	            \If{$max<w[i]$}{
+        	                $max\leftarrow w[i]$\;
+        	                $rankMax\leftarrow i$\;
+                        }
+        	        }
+        	        $capacity\leftarrow c[rankMax]$\;
+        	        
+        	        $i\leftarrow n$\;
+        	        \While{$capacity\ge 0\ and\ i\ge 1$}{
+        	            \If{$c[i]\ge c[rankMax]$}{
+        	            	$A\leftarrow A \cup \{p_i\}$\;
+        	            	$capacity\leftarrow capacity-1$\;
+        	            }
+                    }
+    	    		
+    	    		\Return{$A$}\;
+    	    		
+    	    	\end{algorithm}
+    	    \end{minipage} 
+        \item 
+            The for-loop from Line 5 to Line 17 has a time complexity of $O(n^2)$.
+            
+            The sort has a time complexity of $O(n\log n)$.
+            
+            The for-loop from Line 20 to Line 23 has a time complexity of $O(n)$.
+            
+            Therefore this algorithm has a time complexity of $O(n^2)$.
+            
+            This algorithm has a space complexity of $O(n)$.
+        \end{enumerate}
+\end{enumerate}
+
+\vspace{20pt}
+
+\textbf{Remark:} You need to include your .pdf and .tex files in your uploaded .rar or .zip file.
+
+%========================================================================
+\end{document}
